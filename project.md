@@ -69,8 +69,6 @@ questwright/
 └── README.md
 ```
 
-> **注意**：仓库根下有一份重复的 `questwright/` 子目录，内容与 `apps/`、`services/` 大致一致，疑似误提交的嵌套副本，建议清理（不在 `pnpm-workspace.yaml` / `pyproject.toml` 引用范围内）。本说明只描述顶层这套。
-
 ---
 
 ## 3. 技术栈

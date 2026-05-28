@@ -17,7 +17,6 @@ from openai import AsyncOpenAI
 
 from .base import LLMProvider, LLMResponse
 
-
 logger = logging.getLogger(__name__)
 
 

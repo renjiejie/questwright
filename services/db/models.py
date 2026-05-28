@@ -11,10 +11,13 @@ business data (设计草案 §18.4).
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
+# SQLite has a JSON type via TypeEngine but to keep migrations identical
+# across dialects we use SQLAlchemy's generic JSON which maps to JSON / TEXT.
 from sqlalchemy import (
+    JSON,
     Boolean,
     DateTime,
     ForeignKey,
@@ -25,13 +28,9 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
-# SQLite has a JSON type via TypeEngine but to keep migrations identical
-# across dialects we use SQLAlchemy's generic JSON which maps to JSON / TEXT.
-from sqlalchemy import JSON
-
 
 def _utcnow() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 class Base(DeclarativeBase):
@@ -85,7 +84,9 @@ class HumanReview(Base):
     artifact_id: Mapped[str] = mapped_column(
         String(64), ForeignKey("artifacts.id"), nullable=False, index=True
     )
-    review_type: Mapped[str] = mapped_column(String(32), nullable=False)  # artifact_review|audit_review
+    review_type: Mapped[str] = mapped_column(
+        String(32), nullable=False
+    )  # artifact_review|audit_review
     decision: Mapped[str] = mapped_column(
         String(32), nullable=False
     )  # approve|request_changes|reject|return_previous_stage
@@ -137,11 +138,34 @@ class LlmCallLog(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=_utcnow)
 
 
+class Source(Base):
+    __tablename__ = "sources"
+
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    project_id: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    kind: Mapped[str] = mapped_column(String(32), nullable=False)
+    original_filename: Mapped[str] = mapped_column(String(255), nullable=False)
+    mime_type: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    byte_size: Mapped[int] = mapped_column(Integer, nullable=False)
+    status: Mapped[str] = mapped_column(String(32), nullable=False, index=True)
+    last_error: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=_utcnow)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, nullable=False, default=_utcnow, onupdate=_utcnow
+    )
+
+
 class RagChunk(Base):
     __tablename__ = "rag_chunks"
 
     id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    project_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    source_id: Mapped[str | None] = mapped_column(
+        String(64), ForeignKey("sources.id"), nullable=True
+    )
     source: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    source_ref: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    canon_level: Mapped[str | None] = mapped_column(String(16), nullable=True)
     source_title: Mapped[str | None] = mapped_column(String(255), nullable=True)
     chunk_type: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
     title: Mapped[str | None] = mapped_column(String(255), nullable=True)
@@ -149,4 +173,8 @@ class RagChunk(Base):
     page_start: Mapped[int | None] = mapped_column(Integer, nullable=True)
     page_end: Mapped[int | None] = mapped_column(Integer, nullable=True)
     tags: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
+    metadata_json: Mapped[dict[str, Any] | None] = mapped_column("metadata", JSON, nullable=True)
+    chunk_text: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=_utcnow)
+
+    __table_args__ = (Index("ix_rag_chunks_project", "project_id"),)

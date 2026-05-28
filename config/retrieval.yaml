@@ -1,0 +1,19 @@
+default:
+  vector_weight: 0.6
+  bm25_weight: 0.4
+  source_weights:
+    world_bible: 1.0
+    monster_manual: 1.0
+    phb: 1.0
+    dmg: 1.0
+    srd_misc: 1.0
+
+world_audit:
+  vector_weight: 0.5
+  bm25_weight: 0.5
+  source_weights:
+    world_bible: 1.2
+    monster_manual: 0.9
+    phb: 1.0
+    dmg: 1.1
+    srd_misc: 1.0

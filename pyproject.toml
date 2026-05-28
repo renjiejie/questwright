@@ -18,6 +18,13 @@ dependencies = [
     "langgraph>=0.2.50",
     "langgraph-checkpoint-sqlite>=2.0",
     "openai>=1.54",
+    "chromadb>=1.5.9",
+    "llama-index-core>=0.14.22",
+    "llama-index-vector-stores-chroma>=0.5.5",
+    "docling>=2.95.0",
+    "rank-bm25>=0.2.2",
+    "pyyaml>=6.0.3",
+    "python-multipart>=0.0.29",
 ]
 
 [dependency-groups]

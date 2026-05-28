@@ -12,7 +12,6 @@ from contextlib import AbstractAsyncContextManager
 from pathlib import Path
 from typing import Any
 
-import aiosqlite
 from langgraph.checkpoint.sqlite.aio import AsyncSqliteSaver
 from langgraph.graph import END, START, StateGraph
 

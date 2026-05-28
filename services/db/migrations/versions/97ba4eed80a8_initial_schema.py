@@ -5,17 +5,16 @@ Revises:
 Create Date: 2026-05-19 13:17:04.591336
 """
 
-from typing import Sequence, Union
+from collections.abc import Sequence
 
-from alembic import op
 import sqlalchemy as sa
-
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = '97ba4eed80a8'
-down_revision: Union[str, None] = None
-branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+down_revision: str | None = None
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
@@ -60,7 +59,11 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     with op.batch_alter_table('llm_call_logs', schema=None) as batch_op:
-        batch_op.create_index(batch_op.f('ix_llm_call_logs_project_id'), ['project_id'], unique=False)
+        batch_op.create_index(
+            batch_op.f('ix_llm_call_logs_project_id'),
+            ['project_id'],
+            unique=False,
+        )
         batch_op.create_index(batch_op.f('ix_llm_call_logs_run_id'), ['run_id'], unique=False)
 
     op.create_table('rag_chunks',
@@ -92,7 +95,11 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     with op.batch_alter_table('workflow_runs', schema=None) as batch_op:
-        batch_op.create_index(batch_op.f('ix_workflow_runs_project_id'), ['project_id'], unique=False)
+        batch_op.create_index(
+            batch_op.f('ix_workflow_runs_project_id'),
+            ['project_id'],
+            unique=False,
+        )
 
     op.create_table('artifact_commits',
     sa.Column('id', sa.String(length=64), nullable=False),
@@ -105,7 +112,11 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     with op.batch_alter_table('artifact_commits', schema=None) as batch_op:
-        batch_op.create_index(batch_op.f('ix_artifact_commits_project_id'), ['project_id'], unique=False)
+        batch_op.create_index(
+            batch_op.f('ix_artifact_commits_project_id'),
+            ['project_id'],
+            unique=False,
+        )
         batch_op.create_index(batch_op.f('ix_artifact_commits_run_id'), ['run_id'], unique=False)
 
     op.create_table('audit_reports',
@@ -119,7 +130,11 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     with op.batch_alter_table('audit_reports', schema=None) as batch_op:
-        batch_op.create_index(batch_op.f('ix_audit_reports_artifact_id'), ['artifact_id'], unique=False)
+        batch_op.create_index(
+            batch_op.f('ix_audit_reports_artifact_id'),
+            ['artifact_id'],
+            unique=False,
+        )
 
     op.create_table('human_reviews',
     sa.Column('id', sa.String(length=64), nullable=False),
@@ -132,7 +147,11 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     with op.batch_alter_table('human_reviews', schema=None) as batch_op:
-        batch_op.create_index(batch_op.f('ix_human_reviews_artifact_id'), ['artifact_id'], unique=False)
+        batch_op.create_index(
+            batch_op.f('ix_human_reviews_artifact_id'),
+            ['artifact_id'],
+            unique=False,
+        )
 
     # ### end Alembic commands ###
 

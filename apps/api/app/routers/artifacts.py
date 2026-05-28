@@ -22,7 +22,6 @@ from app.db import get_session
 from services.db.models import Artifact
 from services.db.repositories import ArtifactNotFound, ArtifactRepository
 
-
 router = APIRouter(prefix="/artifacts", tags=["artifacts"])
 
 
@@ -63,7 +62,7 @@ class ArtifactRead(BaseModel):
     created_at: datetime
 
     @classmethod
-    def from_orm_obj(cls, obj: Artifact) -> "ArtifactRead":
+    def from_orm_obj(cls, obj: Artifact) -> ArtifactRead:
         return cls(
             id=obj.id,
             project_id=obj.project_id,
@@ -84,7 +83,7 @@ class ArtifactRead(BaseModel):
 @router.post("", response_model=ArtifactRead, status_code=201)
 async def create_artifact(
     body: ArtifactCreate,
-    session: AsyncSession = Depends(get_session),
+    session: AsyncSession = Depends(get_session),  # noqa: B008
 ) -> ArtifactRead:
     repo = ArtifactRepository(session)
     obj = await repo.create(**body.model_dump())
@@ -94,7 +93,7 @@ async def create_artifact(
 @router.get("/{artifact_id}", response_model=ArtifactRead)
 async def get_artifact(
     artifact_id: str,
-    session: AsyncSession = Depends(get_session),
+    session: AsyncSession = Depends(get_session),  # noqa: B008
 ) -> ArtifactRead:
     repo = ArtifactRepository(session)
     try:
@@ -108,7 +107,7 @@ async def get_artifact(
 async def revise_artifact(
     artifact_id: str,
     body: ArtifactRevise,
-    session: AsyncSession = Depends(get_session),
+    session: AsyncSession = Depends(get_session),  # noqa: B008
 ) -> ArtifactRead:
     repo = ArtifactRepository(session)
     try:
@@ -121,7 +120,7 @@ async def revise_artifact(
 @router.get("", response_model=list[ArtifactRead])
 async def list_artifacts(
     run_id: str = Query(...),
-    session: AsyncSession = Depends(get_session),
+    session: AsyncSession = Depends(get_session),  # noqa: B008
 ) -> list[ArtifactRead]:
     repo = ArtifactRepository(session)
     items = await repo.list_for_run(run_id)

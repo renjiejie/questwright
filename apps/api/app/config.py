@@ -12,7 +12,6 @@ from pathlib import Path
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-
 PROJECT_ROOT = Path(__file__).resolve().parents[2].parent  # repo root
 
 
@@ -28,6 +27,25 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: str = Field(default="", description="OpenAI API key for story generation")
     DEEPSEEK_API_KEY: str = Field(default="", description="DeepSeek API key for world auditing")
 
+    # --- Embedding provider (decoupled from chat LLM) ---
+    # Default targets Aliyun DashScope (OpenAI-compatible), text-embedding-v4 with
+    # dim=1536 to stay compatible with the existing dnd_rag Chroma collection.
+    EMBEDDING_API_KEY: str = Field(
+        default="", description="API key for embedding provider (DashScope by default)"
+    )
+    EMBEDDING_BASE_URL: str = Field(
+        default="https://dashscope.aliyuncs.com/compatible-mode/v1",
+        description="OpenAI-compatible base URL for the embedding endpoint",
+    )
+    EMBEDDING_MODEL: str = Field(
+        default="text-embedding-v4", description="Embedding model name"
+    )
+    EMBEDDING_DIM: int = Field(
+        default=1536,
+        ge=1,
+        description="Embedding output dimension; must match the Chroma collection",
+    )
+
     # --- Storage paths ---
     DATABASE_URL: str = Field(
         default=f"sqlite+aiosqlite:///{PROJECT_ROOT}/data/dnd.db",
@@ -37,14 +55,26 @@ class Settings(BaseSettings):
         default=str(PROJECT_ROOT / "data" / "chroma"),
         description="Local Chroma persistent client path",
     )
+    CHROMA_COLLECTION: str = Field(default="dnd_rag", description="Default Chroma collection name")
     SRD_DATA_PATH: str = Field(
         default=str(PROJECT_ROOT / "vendor" / "5e-database" / "src" / "2014" / "en"),
         description="Path to 5e-bits/5e-database SRD JSON files",
+    )
+    UPLOAD_DIR: str = Field(
+        default=str(PROJECT_ROOT / "data" / "uploads"),
+        description="Directory for uploaded world bible source files",
+    )
+    PARSED_DIR: str = Field(
+        default=str(PROJECT_ROOT / "data" / "parsed"),
+        description="Directory for parsed source artifacts",
     )
 
     # --- Runtime knobs ---
     APP_ENV: str = Field(default="dev", description="dev|staging|prod")
     LOG_LEVEL: str = Field(default="INFO")
+    EMBEDDING_BATCH_SIZE: int = Field(default=64, ge=1)
+    RETRIEVAL_TOP_K: int = Field(default=8, ge=1)
+    MAX_UPLOAD_BYTES: int = Field(default=20 * 1024 * 1024, ge=1)
 
     @field_validator("APP_ENV")
     @classmethod

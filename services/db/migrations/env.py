@@ -20,8 +20,8 @@ if str(ROOT) not in sys.path:
 sys.path.insert(0, str(ROOT / "apps" / "api"))
 
 from app.config import get_settings  # noqa: E402
-from services.db.models import Base  # noqa: E402
 
+from services.db.models import Base  # noqa: E402
 
 config = context.config
 
