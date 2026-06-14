@@ -75,6 +75,13 @@ class Settings(BaseSettings):
     EMBEDDING_BATCH_SIZE: int = Field(default=64, ge=1)
     RETRIEVAL_TOP_K: int = Field(default=8, ge=1)
     MAX_UPLOAD_BYTES: int = Field(default=20 * 1024 * 1024, ge=1)
+    CORS_ALLOW_ORIGINS: str = Field(
+        default="http://localhost:3765,http://127.0.0.1:3765",
+        description="Comma-separated origins allowed by CORS (dev/staging only)",
+    )
+
+    def cors_allow_origins(self) -> list[str]:
+        return [o.strip() for o in self.CORS_ALLOW_ORIGINS.split(",") if o.strip()]
 
     @field_validator("APP_ENV")
     @classmethod

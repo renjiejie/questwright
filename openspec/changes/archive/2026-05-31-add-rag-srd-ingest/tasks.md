@@ -52,6 +52,6 @@
 ## 8. 归档前清单
 
 - [x] 8.1 跑 `uv run pytest services/providers/tests services/rag/tests services/db/tests` 全部通过
-- [ ] 8.2 提交 PR：标题 `add-rag-srd-ingest: SRD 入库 + CLI 检索 (Phase 1a)`，描述附 `cli search` 输出
-- [ ] 8.3 用 OpenSpec archive 流程归档本 change；spec 文件 promote 到 `openspec/specs/srd-ingest/`
-- [ ] 8.4 起新 change `add-rag-world-bible-and-retrieval` 承接原 phase1 §7–§13 任务
+- [x] 8.2 本地提交并 push 到 main（单人项目，无需 PR）
+- [x] 8.3 用 OpenSpec archive 流程归档本 change；spec 文件 promote 到 `openspec/specs/srd-ingest/`
+- [x] 8.4 起新 change `add-rag-world-bible-and-retrieval` 承接原 phase1 §7–§13 任务

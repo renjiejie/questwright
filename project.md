@@ -43,7 +43,7 @@ questwright/
 ├── services/                      # Python 业务模块（pythonpath = repo 根）
 │   ├── db/
 │   │   ├── models.py              # SQLAlchemy 表模型（artifacts 等 7 张表）
-│   │   ├── repositories.py        # Artifact 仓储（CRUD + version+1 fork）
+│   │   ├── repositories.py*        # Artifact 仓储（CRUD + version+1 fork）
 │   │   ├── session.py             # AsyncEngine / session_scope
 │   │   └── migrations/            # Alembic（env.py + versions/*）
 │   ├── providers/

@@ -20,11 +20,15 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from .models import Artifact
+from .models import Artifact, Source
 
 
 def _new_id() -> str:
     return f"artifact_{uuid.uuid4().hex[:16]}"
+
+
+def _new_source_id() -> str:
+    return f"source_{uuid.uuid4().hex[:16]}"
 
 
 class ArtifactNotFound(LookupError):
@@ -108,3 +112,59 @@ class ArtifactRepository:
         self._session.add(new)
         await self._session.flush()
         return new
+
+
+class SourceNotFound(LookupError):
+    pass
+
+
+class SourceRepository:
+    """CRUD for uploaded document sources and their ingest status machine."""
+
+    def __init__(self, session: AsyncSession) -> None:
+        self._session = session
+
+    async def create(
+        self,
+        *,
+        project_id: str,
+        kind: str,
+        original_filename: str,
+        mime_type: str | None,
+        byte_size: int,
+        status: str = "uploaded",
+        source_id: str | None = None,
+    ) -> Source:
+        source = Source(
+            id=source_id or _new_source_id(),
+            project_id=project_id,
+            kind=kind,
+            original_filename=original_filename,
+            mime_type=mime_type,
+            byte_size=byte_size,
+            status=status,
+        )
+        self._session.add(source)
+        await self._session.flush()
+        return source
+
+    async def get(self, source_id: str) -> Source:
+        obj = await self._session.get(Source, source_id)
+        if obj is None:
+            raise SourceNotFound(source_id)
+        return obj
+
+    async def update_status(self, source_id: str, status: str) -> Source:
+        obj = await self.get(source_id)
+        obj.status = status
+        if status != "failed":
+            obj.last_error = None
+        await self._session.flush()
+        return obj
+
+    async def set_error(self, source_id: str, error: str) -> Source:
+        obj = await self.get(source_id)
+        obj.status = "failed"
+        obj.last_error = error
+        await self._session.flush()
+        return obj

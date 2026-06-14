@@ -34,7 +34,18 @@ class ChromaIndex:
         )
 
     def query(self, embedding: list[float], top_k: int) -> list[dict[str, object]]:
-        result = self._collection.query(query_embeddings=[embedding], n_results=top_k)
+        return self.query_where(embedding, top_k=top_k, where=None)
+
+    def query_where(
+        self,
+        embedding: list[float],
+        top_k: int,
+        where: dict[str, object] | None = None,
+    ) -> list[dict[str, object]]:
+        kwargs: dict[str, object] = {"query_embeddings": [embedding], "n_results": top_k}
+        if where:
+            kwargs["where"] = where
+        result = self._collection.query(**kwargs)
         ids = result.get("ids", [[]])[0]
         documents = result.get("documents", [[]])[0]
         metadatas = result.get("metadatas", [[]])[0]
@@ -57,6 +68,9 @@ class ChromaIndex:
         result_ids = result.get("ids", [])
         embeddings = result.get("embeddings", [])
         return {str(result_ids[i]): list(embeddings[i]) for i in range(len(result_ids))}
+
+    def delete_by_source_id(self, source_id: str) -> None:
+        self._collection.delete(where={"source_id": source_id})
 
 
 def _filterable_metadata(chunk: RagChunk) -> dict[str, object]:
@@ -114,3 +128,16 @@ async def existing_chunk_ids(session: AsyncSession, chunk_ids: list[str]) -> set
         return set()
     result = await session.execute(select(RagChunkModel.id).where(RagChunkModel.id.in_(chunk_ids)))
     return {row[0] for row in result.all()}
+
+
+async def delete_chunks_by_source_id(session: AsyncSession, source_id: str) -> list[str]:
+    """Delete all SQLite rag_chunks rows for a source; return the removed ids."""
+    result = await session.execute(
+        select(RagChunkModel.id).where(RagChunkModel.source_id == source_id)
+    )
+    removed = [row[0] for row in result.all()]
+    if removed:
+        await session.execute(
+            RagChunkModel.__table__.delete().where(RagChunkModel.source_id == source_id)
+        )
+    return removed
